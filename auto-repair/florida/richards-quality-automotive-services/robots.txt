@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /
+
+Sitemap: https://vinaynay9.github.io/demos/auto-repair/florida/richards-quality-automotive-services/sitemap.xml
