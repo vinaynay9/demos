@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /
+
+Sitemap: https://vinaynay9.github.io/demos/hvac/florida/west-florida-air-conditioning-and-heating-inc/sitemap.xml
