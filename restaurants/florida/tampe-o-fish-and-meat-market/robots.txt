@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /
+
+Sitemap: https://vinaynay9.github.io/demos/restaurants/florida/tampe-o-fish-and-meat-market/sitemap.xml
