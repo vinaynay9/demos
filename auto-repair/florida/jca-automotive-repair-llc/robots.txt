@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /
+
+Sitemap: https://vinaynay9.github.io/demos/auto-repair/florida/jca-automotive-repair-llc/sitemap.xml
