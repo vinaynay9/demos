@@ -137,8 +137,9 @@ FX.def('bg-mesh', function (c) {
     var L = document.createElement('div'), i;
     L.className = 'fx-mesh'; L.setAttribute('aria-hidden', 'true'); L.style.cssText = 'position:absolute;inset:0;pointer-events:none'; L.style.opacity = s;
     for (i = 0; i < 4; i++) L.appendChild(document.createElement('i'));
-    t.insertBefore(L, t.firstChild); t.style.isolation = 'isolate';
+    // Containing block first, then insert: setting position after the layer is in moves the blobs (counted as layout shift).
     if (getComputedStyle(t).position === 'static') t.style.position = 'relative';
+    t.style.isolation = 'isolate'; t.insertBefore(L, t.firstChild);
   });
 });
 
@@ -241,4 +242,16 @@ FX.def('section-tint', function (c) {
   addEventListener('scroll', function () { if (!busy) { busy = 1; requestAnimationFrame(pick); } }, { passive: true });
   addEventListener('resize', pick, { passive: true });
   pick();
+});
+
+/* fx sheen */
+/* sheen: a diagonal light sweep that crosses the primary buttons every few seconds and on hover (CSS, see sheen.css).
+   This script only handles an optional image: opt {hero: "selector"} puts the same sweep over that block (the hero image
+   box). Nothing with reduced motion. */
+FX.def('sheen', function (c) {
+  if (FX.reduced || !c.opt.hero) return;
+  FX.$$(c.opt.hero).forEach(function (t) {
+    var s = document.createElement('span'); s.className = 'fx-sheen-img'; s.setAttribute('aria-hidden', 'true');
+    if (getComputedStyle(t).position === 'static') t.style.position = 'relative'; t.style.overflow = 'hidden'; t.appendChild(s);
+  });
 });

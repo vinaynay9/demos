@@ -202,8 +202,8 @@ FX.def('bg-topo', function (c) {
       svg += '</g>';
     });
     L.innerHTML = svg + '</svg>';
-    t.insertBefore(L, t.firstChild); t.style.isolation = 'isolate';
-    if (getComputedStyle(t).position === 'static') t.style.position = 'relative';
+    if (getComputedStyle(t).position === 'static') t.style.position = 'relative';   // before inserting: no layout shift
+    t.style.isolation = 'isolate'; t.insertBefore(L, t.firstChild);
   });
 });
 

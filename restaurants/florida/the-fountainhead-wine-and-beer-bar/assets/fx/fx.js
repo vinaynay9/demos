@@ -185,8 +185,8 @@ FX.def('tilt', function (c) {
   }).forEach(function (el) {
     var g, r, tr = el.style.transition, live = 0;
     if (c.opt.glare !== false) {
+      if (getComputedStyle(el).position === 'static') el.style.position = 'relative';   // before appending: no layout shift
       g = document.createElement('span'); g.className = 'fx-tilt-g'; g.setAttribute('aria-hidden', 'true'); el.appendChild(g);
-      if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
     }
     function ease(ms) { el.style.transition = getComputedStyle(el).transition + ', transform ' + ms + 'ms cubic-bezier(.2,.7,.2,1)'; }
     el.addEventListener('pointerenter', function (e) {
@@ -290,4 +290,28 @@ FX.def('lightbox-plus', function (c) {
     if (!a || !a.getAttribute('href')) return;
     e.preventDefault(); e.stopImmediatePropagation(); open(a);
   }, true);
+});
+
+/* fx btn-fill */
+/* btn-fill: inserts the fill layer and tracks which side the pointer entered/left from. Mouse only. */
+FX.def('btn-fill', function (c) {
+  if (!FX.fine) return;
+  var acc = FX.color('--accent');
+  c.els('.btn').forEach(function (b) {
+    if (b.matches('.callbar') || b.querySelector(':scope > .fx-bf-l')) return;
+    var cs = getComputedStyle(b), l = document.createElement('span');
+    l.className = 'fx-bf-l'; l.setAttribute('aria-hidden', 'true'); l.style.cssText = 'position:absolute;inset:0;pointer-events:none'; b.insertBefore(l, b.firstChild);
+    b.classList.add('fx-bf');
+    if (cs.position === 'static') b.classList.add('fx-bf-r');
+    if (cs.backgroundColor === acc) b.classList.add('fx-bf-ink');
+    else if (/rgba\(.*, 0\)|transparent/.test(cs.backgroundColor)) b.classList.add('fx-bf-alt');
+    b.style.transition = (parseFloat(cs.transitionDuration) ? cs.transition + ', ' : '') + 'color .4s cubic-bezier(.2,.7,.2,1), border-color .4s cubic-bezier(.2,.7,.2,1)';
+    function set(e) {
+      var r = b.getBoundingClientRect(), k = function (v) { return Math.max(-1, Math.min(1, v)).toFixed(2); };
+      b.style.setProperty('--fx-dx', k((e.clientX - r.left) / r.width * 2 - 1));
+      b.style.setProperty('--fx-dy', k((e.clientY - r.top) / r.height * 2 - 1));
+    }
+    b.addEventListener('pointerenter', set); b.addEventListener('pointerleave', set);
+    b.addEventListener('focus', function () { b.style.setProperty('--fx-dx', 0); b.style.setProperty('--fx-dy', 0); });
+  });
 });

@@ -96,8 +96,8 @@ FX.def('bg-particles', function (c) {
     var cv = document.createElement('canvas'), g = cv.getContext('2d'), W = 0, H = 0, dpr = 1, ps = [], vis = 1, raf = 0, last = 0;
     if (!g) return;
     cv.className = 'fx-pt'; cv.setAttribute('aria-hidden', 'true'); cv.style.cssText = 'position:absolute;inset:0;pointer-events:none';
-    t.insertBefore(cv, t.firstChild); t.style.isolation = 'isolate';
-    if (getComputedStyle(t).position === 'static') t.style.position = 'relative';
+    if (getComputedStyle(t).position === 'static') t.style.position = 'relative';   // before inserting: no layout shift
+    t.style.isolation = 'isolate'; t.insertBefore(cv, t.firstChild);
     var cP = FX.color('--primary'), cA = FX.color('--accent'), cI = FX.color('--ink');
     var cols = kind === 'sparks' ? [cA, cA, cP] : kind === 'bubbles' ? [cA, cP] : [cI, cP, cA];
     var R = Math.random;
@@ -159,6 +159,11 @@ FX.def('bg-particles', function (c) {
 FX.def('highlight-sweep', function (c) {
   var st = c.opt.style === 'underline' ? 'underline' : 'marker';
   c.els('[data-fx-highlight], main > :first-child h1 em').forEach(function (el) {
+    // A block/flex <em> (some kits break the emphasised words onto their own line) would paint the band across the whole
+    // column: mark an inline wrapper of its contents instead, so the band follows the words.
+    if (getComputedStyle(el).display !== 'inline') {
+      var w = document.createElement('span'); while (el.firstChild) w.appendChild(el.firstChild); el.appendChild(w); el = w;
+    }
     el.setAttribute('data-fx-hl', st);
     if (FX.reduced) { el.classList.add('fx-hl-on'); return; }
     FX.seen([el], function () { setTimeout(function () { el.classList.add('fx-hl-on'); }, 350); }, '0px');
@@ -183,5 +188,25 @@ FX.def('img-zoom', function (c) {
     var host = fig && fig.querySelectorAll('img').length === 1 ? fig : (a && a.contains(img) ? a : f);
     host.classList.add('fx-zoom-host');
     var cap = fig && fig.querySelector('figcaption'); if (cap) cap.classList.add('fx-zoom-cap');
+  });
+});
+
+/* fx stars-fill */
+/* stars-fill: elements whose own text is only stars (default [class*=star], or sel) fill left to right once, when seen.
+   The text node is wrapped in a span (inline, same glyphs, aria-hidden left as it was). No reduced-motion animation. opt: {ms: 900} */
+FX.def('stars-fill', function (c) {
+  if (FX.reduced) return;
+  var ms = +c.opt.ms || 900, els = c.els('[class*=star]').filter(function (e) {
+    return !e.children.length && /^[\s★☆]+$/.test(e.textContent) && /[★☆]/.test(e.textContent);
+  });
+  els.forEach(function (el) {
+    var s = document.createElement('span');
+    s.className = 'fx-stars-in fx-stars-w';
+    while (el.firstChild) s.appendChild(el.firstChild);
+    el.appendChild(s);
+    FX.seen([el], function () {
+      s.classList.remove('fx-stars-w');
+      s.animate([{ backgroundPosition: '100% 0' }, { backgroundPosition: '0 0' }], { duration: ms, easing: 'cubic-bezier(.45,.05,.2,1)' });
+    });
   });
 });

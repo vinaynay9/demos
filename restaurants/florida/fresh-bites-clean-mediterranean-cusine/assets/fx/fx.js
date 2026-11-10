@@ -102,8 +102,8 @@ FX.def('bg-waves', function (c) {
         ');opacity:' + (0.5 - i * 0.07).toFixed(2) + '"/></svg>';
     }
     L.innerHTML = h;
-    t.insertBefore(L, t.firstChild); t.style.isolation = 'isolate';
-    if (getComputedStyle(t).position === 'static') t.style.position = 'relative';
+    if (getComputedStyle(t).position === 'static') t.style.position = 'relative';   // before inserting: no layout shift
+    t.style.isolation = 'isolate'; t.insertBefore(L, t.firstChild);
   });
 });
 
@@ -125,5 +125,37 @@ FX.def('img-zoom', function (c) {
     var host = fig && fig.querySelectorAll('img').length === 1 ? fig : (a && a.contains(img) ? a : f);
     host.classList.add('fx-zoom-host');
     var cap = fig && fig.querySelector('figcaption'); if (cap) cap.classList.add('fx-zoom-cap');
+  });
+});
+
+/* fx heading-scrub */
+/* heading-scrub: marks the section headings (h2 by default) the CSS animates. Letter-spacing is deliberately not animated (it would
+   reflow the text); the heading lifts, fades up and un-clips instead. Browsers without scroll-driven animations: nothing happens. */
+FX.def('heading-scrub', function (c) {
+  if (FX.reduced || !(window.CSS && CSS.supports('animation-timeline: view()'))) return;
+  c.els('main h2').forEach(function (e) { e.setAttribute('data-fx-hs', ''); });
+});
+
+/* fx btn-fill */
+/* btn-fill: inserts the fill layer and tracks which side the pointer entered/left from. Mouse only. */
+FX.def('btn-fill', function (c) {
+  if (!FX.fine) return;
+  var acc = FX.color('--accent');
+  c.els('.btn').forEach(function (b) {
+    if (b.matches('.callbar') || b.querySelector(':scope > .fx-bf-l')) return;
+    var cs = getComputedStyle(b), l = document.createElement('span');
+    l.className = 'fx-bf-l'; l.setAttribute('aria-hidden', 'true'); l.style.cssText = 'position:absolute;inset:0;pointer-events:none'; b.insertBefore(l, b.firstChild);
+    b.classList.add('fx-bf');
+    if (cs.position === 'static') b.classList.add('fx-bf-r');
+    if (cs.backgroundColor === acc) b.classList.add('fx-bf-ink');
+    else if (/rgba\(.*, 0\)|transparent/.test(cs.backgroundColor)) b.classList.add('fx-bf-alt');
+    b.style.transition = (parseFloat(cs.transitionDuration) ? cs.transition + ', ' : '') + 'color .4s cubic-bezier(.2,.7,.2,1), border-color .4s cubic-bezier(.2,.7,.2,1)';
+    function set(e) {
+      var r = b.getBoundingClientRect(), k = function (v) { return Math.max(-1, Math.min(1, v)).toFixed(2); };
+      b.style.setProperty('--fx-dx', k((e.clientX - r.left) / r.width * 2 - 1));
+      b.style.setProperty('--fx-dy', k((e.clientY - r.top) / r.height * 2 - 1));
+    }
+    b.addEventListener('pointerenter', set); b.addEventListener('pointerleave', set);
+    b.addEventListener('focus', function () { b.style.setProperty('--fx-dx', 0); b.style.setProperty('--fx-dy', 0); });
   });
 });

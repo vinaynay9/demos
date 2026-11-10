@@ -308,7 +308,14 @@ FX.def('cursor-blend', function (c) {
 FX.def('magnetic', function (c) {
   if (!FX.fine || FX.reduced) return;
   var R = +c.opt.range || 80, M = +c.opt.max || 9, run = 0, px = -9e3, py = -9e3;
-  var it = c.els('.btn').filter(function (e) { return !e.matches('.callbar'); }).map(function (e) {
+  // press-style buttons (hard offset shadow, no blur) already move on hover; leaning them too makes them wobble (Vinay 2026-11-09)
+  function pressy(e) {
+    return getComputedStyle(e).boxShadow.replace(/rgba?\([^)]*\)/g, '').split(',').some(function (sh) {
+      var n = (sh.match(/-?[\d.]+px/g) || []).map(parseFloat);   // x y blur spread
+      return n.length >= 2 && !(n[2] > 0) && (n[0] || n[1]);
+    });
+  }
+  var it = c.els('.btn').filter(function (e) { return !e.matches('.callbar') && !pressy(e); }).map(function (e) {
     var l = e.querySelector('span');
     if (l && getComputedStyle(l).display === 'inline') l.style.display = 'inline-block';
     return { e: e, l: l, x: 0, y: 0, vx: 0, vy: 0, tx: 0, ty: 0 };
