@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /
+
+Sitemap: https://austin-vol-tech.ronandvin.com/sitemap.xml

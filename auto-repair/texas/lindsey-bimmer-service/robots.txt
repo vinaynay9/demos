@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /
+
+Sitemap: https://lindsey-bimmer-service.ronandvin.com/sitemap.xml

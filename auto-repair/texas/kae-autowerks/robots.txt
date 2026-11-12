@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /
+
+Sitemap: https://kae-autowerks.ronandvin.com/sitemap.xml

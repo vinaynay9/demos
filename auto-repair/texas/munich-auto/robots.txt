@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /
+
+Sitemap: https://munich-auto.ronandvin.com/sitemap.xml
